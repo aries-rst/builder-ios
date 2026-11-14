@@ -18,14 +18,6 @@ func rgbOf(_ s: String) -> (Double, Double, Double) {
     var h = s; if h.hasPrefix("#") { h.removeFirst() }; let v = UInt32(h, radix: 16) ?? 0x888888
     return (Double((v >> 16) & 255) / 255, Double((v >> 8) & 255) / 255, Double(v & 255) / 255)
 }
-func roofColor(_ b: Obj) -> String { eq(b["kind"], "greenhouse") ? "#BBF7D0" : (D.o("RCOL")[RF(b).s("color")] as? String ?? "#B45309") }
-func fenceColor() -> String {
-    let f = FN(); let t = f.s("type")
-    if t == "concrete" || t == "block" { return "#A8A29E" }
-    if t == "brick" { return D.o("BTYPE").o("ceramFull").s("col") }
-    if t == "mesh" { return "#94A3B8" }
-    return D.o("FCOLS")[f.s("color")] as? String ?? "#166534"
-}
 func fenceFaces() -> [Face] {
     let p = St.project; if p["fence"] == nil || !FN().b("on") { return [] }
     let f = FN(); let col = fenceColor(); var out: [Face] = []
