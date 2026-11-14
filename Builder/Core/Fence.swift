@@ -55,7 +55,10 @@ func calcFence() -> Obj {
         if eq(g["kind"], "slide") { let a: Double = 2 * (w * 1.5 + H); frameSum += a + w * 1.5 } else { let a: Double = 2 * (w / 2 + H); frameSum += 2 * a + w } }
     for x in wk { let w: Double = x.n("w"); let a: Double = 2 * (w + H); frameSum += a + w }
     r["frame"] = frameSum
-    r["infill"] = gates.reduce(0) { $0 + $1.n("w") * H } + wk.reduce(0) { $0 + $1.n("w") * H }; r["hinges"] = Double(gates.filter { !eq($0["kind"], "slide") }.count) * 4 + Double(wk.count) * 2; r["locks"] = Double(gates.count + wk.count)
+    var infill: Double = 0
+    for g in gates { infill += g.n("w") * H }
+    for x in wk { infill += x.n("w") * H }
+    r["infill"] = infill; r["hinges"] = Double(gates.filter { !eq($0["kind"], "slide") }.count) * 4 + Double(wk.count) * 2; r["locks"] = Double(gates.count + wk.count)
     let sl = gates.filter { eq($0["kind"], "slide") }; r["kits"] = Double(sl.count); r["channel"] = sl.reduce(0) { $0 + $1.n("w") * 0.5 }; if !sl.isEmpty { r["slideV"] = Double(sl.count) * 0.6 }
     St.project["calcFence"] = r; return r
 }

@@ -29,7 +29,9 @@ func calcFound0(_ b: Obj) -> Obj {
         let fo = fbsDim(f.s("fbs")); let fi = fbsDim(f.s("fbsIn")); let wo = fo[1] / 1000; let wi = fi[1] / 1000; let Lo = bPer(b) - 4 * wo; let Li = F("inner"); let hh = F("rows") * (fo[2] / 1000 + 0.01)
         let o = fbsCount(Lo, f.s("fbs"), F("rows")); let i = Li > 0 ? fbsCount(Li, f.s("fbsIn"), F("rows")) : FbsC(pcs: 0, rest: 0, restV: 0)
         r["L"] = Lo; r["Li"] = Li; r["fbsOut"] = o.pcs; r["fbsIn"] = i.pcs; r["fbsH"] = hh
-        r["fbsW"] = (o.pcs * fo.reduce(1.0) { $0 * $1 / 1000 } + i.pcs * fi.reduce(1.0) { $0 * $1 / 1000 }) * 2.4
+        var vo: Double = 1; for x in fo { vo *= x / 1000 }
+        var vi: Double = 1; for x in fi { vi *= x / 1000 }
+        r["fbsW"] = (o.pcs * vo + i.pcs * vi) * 2.4
         r["insertV"] = (o.restV + i.restV) * 1.05; let pad = f.b("pad"); let pw = wo + 0.2; let pwi = wi + 0.2
         r["padV"] = pad ? (Lo * pw + Li * pwi) * 0.3 : 0.0; r["V"] = r.n("padV") + r.n("insertV")
         r["mainM"] = pad ? (Lo + Li) * 4 * 1.1 : 0.0

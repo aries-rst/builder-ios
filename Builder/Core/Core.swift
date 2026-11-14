@@ -251,7 +251,11 @@ func siteStats() -> SiteStats {
     for it in items() { if isB(it) { if !noClash(it) { r.built += bArea(it) } } else if eq(it["kind"], "tree") { r.trees += 1 } else { r.addZone(it.s("kind"), it.n("w") * it.n("d")) } }
     r.free = max(r.area - r.built - r.zones.reduce(0) { $0 + $1.1 }, 0)
     let pave = r.zone("path") + r.zone("paving")
-    let curb = items().filter { eq($0["kind"], "path") }.reduce(0.0) { $0 + 2 * max($1.n("w"), $1.n("d")) } + items().filter { eq($0["kind"], "paving") }.reduce(0.0) { $0 + 2 * ($1.n("w") + $1.n("d")) }
+    var curb = 0.0
+    for it in items() {
+        if eq(it["kind"], "path") { let a: Double = max(it.n("w"), it.n("d")); curb += 2 * a }
+        else if eq(it["kind"], "paving") { let a: Double = it.n("w") + it.n("d"); curb += 2 * a }
+    }
     r.tiles = pave * 1.05; let pz = SZm("pave"); r.pavePcs = Int(ceil(pave * 1.05 / (pz[0] * pz[1]))); r.curb = curb; r.bSand = pave * 0.05; r.bGravel = pave * 0.1
     r.seed = r.zone("lawn") * 0.04; r.soil = (r.zone("lawn") + r.zone("garden")) * 0.1
     return r

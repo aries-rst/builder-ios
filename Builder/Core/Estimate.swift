@@ -10,9 +10,14 @@ func tasPrice(_ pk: String) -> Double {
     if let g = rxm("^blk_([a-z]+)", pk) { let mat = g[1]; if mat == "brick" { return 1000 }; let M = D.WMAT.oo(mat)
         let last = pk.components(separatedBy: "_").last ?? ""; var t = Double(last) ?? 0; if t == 0 { t = 0.3 }
         let m3 = num(D.o("TAS_M3")[mat]); return (M != nil && m3 != 0) ? Double(mround(m3 * M!.n("L") * M!.n("H") * t / 100)) * 100 : 0 }
-    if let g = rxm("^op_(win|door)_([a-z]+)_[a-z]+_(\\d)_(\\d+)x(\\d+)", pk) { let A = max(0.5, (Double(g[4]) ?? 0) * (Double(g[5]) ?? 0) / 1e6)
-        var base = num((g[1] == "win" ? D.o("TAS_WIN") : D.o("TAS_DOOR"))[g[2]], 900000); if base == 0 { base = 900000 }; let gk = ["1": 0.9, "2": 1.0, "3": 1.15][g[3]] ?? 1.0
-        return Double(mround(base * A * (g[1] == "win" ? gk : 1.0) / 1000)) * 1000 }
+    if let g = rxm("^op_(win|door)_([a-z]+)_[a-z]+_(\\d)_(\\d+)x(\\d+)", pk) {
+        let ww: Double = Double(g[4]) ?? 0; let hh: Double = Double(g[5]) ?? 0; let A: Double = max(0.5, ww * hh / 1e6)
+        let isWin = g[1] == "win"; let tab: Obj = isWin ? D.o("TAS_WIN") : D.o("TAS_DOOR")
+        var base: Double = num(tab[g[2]], 900000); if base == 0 { base = 900000 }
+        let gks: [String: Double] = ["1": 0.9, "2": 1.0, "3": 1.15]; let gk: Double = gks[g[3]] ?? 1.0
+        let mul: Double = isWin ? gk : 1.0
+        let v: Double = base * A * mul / 1000
+        return Double(mround(v)) * 1000 }
     if let g = rxm("^pk_ПК (\\d+)\\.(\\d+)", pk) { let a: Double = Double(g[1]) ?? 0; let b: Double = Double(g[2]) ?? 0; var x: Double = a / 10; x = x * b; x = x / 10; x = x * 230000; x = x / 1000; return Double(mround(x)) * 1000 }
     if let g = rxm("^pb_\\d?ПБ (\\d+)", pk) { let a: Double = Double(g[1]) ?? 0; var x: Double = a / 10; x = x * 45000; x = x / 1000; return Double(mround(x)) * 1000 }
     if let g = rxm("^fbs_(\\d+)\\.(\\d+)", pk) { let a: Double = Double(g[1]) ?? 0; let b: Double = Double(g[2]) ?? 0; var x: Double = (a / 10) * (b / 10); x = x * 0.6; x = x * 560000; x = x / 1000; return Double(mround(x)) * 1000 }

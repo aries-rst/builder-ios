@@ -281,7 +281,9 @@ func layoutOpenings(_ b: Obj, _ ops: [Obj]) -> [Obj] {
     let per = Int((Double(wins.count) / Double(fl)).rounded(.up))
     for f in 0..<fl { let chunk = Array(wins.dropFirst(f * per).prefix(per)); let k = chunk.count; if k == 0 { continue }
         let q = lens.map { $0 / sum * Double(k) }; var base = q.map { Int($0.rounded(.down)) }; var rest = k - base.reduce(0, +)
-        let order = q.enumerated().map { (i, v) in (v - Double(base[i]), i) }.sorted { $0.0 != $1.0 ? $0.0 > $1.0 : $0.1 < $1.1 }
+        var order: [(Double, Int)] = []
+        for (i, v) in q.enumerated() { let dv: Double = v - Double(base[i]); order.append((dv, i)) }
+        order.sort { (a: (Double, Int), b: (Double, Int)) -> Bool in if a.0 != b.0 { return a.0 > b.0 }; return a.1 < b.1 }
         for (_, i) in order { if rest > 0 { base[i] += 1; rest -= 1 } }
         var p = 0
         for (i, cnt) in base.enumerated() { for _ in 0..<cnt { slots[i][f].append(assign(obj(("door", 0.0)), chunk[p])); p += 1 } } }
