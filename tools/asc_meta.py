@@ -29,7 +29,7 @@ PREMIUM (one-time purchase)
 • Unlimited projects (free version: 2 projects)
 
 18 languages, including right-to-left languages. Your projects are stored on your device.""",
- kw="house,build,construction,plan,estimate,cost,3D,floor plan,home,calculator,materials,roof,fence,plot,architect",
+ kw="house,build,construction,plan,estimate,cost,3D,floor plan,home,calculator,materials,roof,fence,plot",
  promo="Plan your house from plot to 3D view and get a full material estimate.",
  sub="Plot, 3D plan, cost estimate", name="Home Builder: Plan & Estimate")
 RU=dict(desc="""«Строитель» — полный планировщик строительства дома: от пустого участка до готового вида.
@@ -56,7 +56,7 @@ PREMIUM (разовая покупка)
 18 языков, включая языки с письмом справа налево. Проекты хранятся на вашем устройстве.""",
  kw="дом,стройка,строительство,план,смета,расчёт,3D,планировка,материалы,крыша,забор,участок,калькулятор",
  promo="Спланируйте дом от участка до 3D-вида и получите полную смету материалов.",
- sub="Участок, 3D-план, смета", name="Строитель")
+ sub="Участок, 3D-план, смета", name="Строитель: план и смета дома")
 # categories
 ai=call("GET",f"/v1/apps/{APP}/appInfos")["data"]
 print("appInfos",[(a["id"],a["attributes"].get("appStoreState")) for a in ai])
@@ -82,7 +82,16 @@ ar=call("GET",f"/v1/appInfos/{info}/ageRatingDeclaration").get("data")
 if ar:
     none={k:"NONE" for k in ["alcoholTobaccoOrDrugUseOrReferences","contests","gamblingSimulated","horrorOrFearThemes","matureOrSuggestiveThemes","medicalOrTreatmentInformation","profanityOrCrudeHumor","sexualContentGraphicAndNudity","sexualContentOrNudity","violenceCartoonOrFantasy","violenceRealistic","violenceRealisticProlongedGraphicOrSadistic"]}
     flags={"gambling":False,"unrestrictedWebAccess":False,"lootBox":False}
-    call("PATCH",f"/v1/ageRatingDeclarations/{ar['id']}",{"data":{"type":"ageRatingDeclarations","id":ar["id"],"attributes":dict(none,**flags)}})
+    at=dict(none,**flags,gunsOrOtherWeapons="NONE")
+    import re
+    for _ in range(12):
+        r=requests.patch(B+f"/v1/ageRatingDeclarations/{ar['id']}",headers=H(),data=json.dumps({"data":{"type":"ageRatingDeclarations","id":ar["id"],"attributes":at}}))
+        if r.status_code<300: print("age ok",at); break
+        m=re.search(r"attribute '(\w+)'",r.text); u=re.search(r"Unknown attribute '?(\w+)",r.text)
+        print("age retry",r.status_code,r.text[:300])
+        if m: at[m.group(1)]= "NONE" if m.group(1) in ("advertising","parentalControls","healthOrWellnessTopics","messagingAndChat","userGeneratedContent","ageAssurance") and False else False
+        elif u and u.group(1) in at: del at[u.group(1)]
+        else: break
 # build
 bs=call("GET",f"/v1/builds?filter[app]={APP}&sort=-uploadedDate&limit=3")["data"]
 print("builds",[(b["id"],b["attributes"]["version"],b["attributes"]["processingState"]) for b in bs])
