@@ -2,9 +2,6 @@ import SwiftUI
 
 @main
 struct BuilderApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
+    init() { Store.initApp(); Premium.initApp() }
+    var body: some Scene { WindowGroup { Root() } }
 }
