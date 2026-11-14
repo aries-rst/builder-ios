@@ -99,6 +99,7 @@ final class TouchView: UIView {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
 }
+enum DBG { static var d = 0, m = 0, z = 0, u = 0 }
 struct Gestures: View {
     var onDown: (CGPoint) -> Void; var onMove: (CGPoint, CGPoint) -> Void; var onZoom: (CGFloat, CGPoint) -> Void = { _, _ in }; var onUp: () -> Void
     @State private var started = false; @State private var last = CGPoint.zero; @State private var lastMag: CGFloat = 1; @State private var mag = false; @State private var size = CGSize.zero
@@ -108,18 +109,18 @@ struct Gestures: View {
                 .highPriorityGesture(
                     DragGesture(minimumDistance: 0, coordinateSpace: .local)
                         .onChanged { v in
-                            if !started { started = true; UIS.shared.lock = true; last = v.startLocation; onDown(v.startLocation) }
+                            if !started { started = true; DBG.d += 1; UIS.shared.lock = true; last = v.startLocation; onDown(v.startLocation) }
                             if mag { last = v.location; return }
                             let d = CGPoint(x: v.location.x - last.x, y: v.location.y - last.y); last = v.location
-                            if d.x != 0 || d.y != 0 { onMove(v.location, d) }
+                            if d.x != 0 || d.y != 0 { DBG.m += 1; onMove(v.location, d) }
                         }
-                        .onEnded { _ in started = false; mag = false; lastMag = 1; UIS.shared.lock = false; onUp() }
+                        .onEnded { _ in DBG.u += 1; started = false; mag = false; lastMag = 1; UIS.shared.lock = false; onUp() }
                 )
                 .simultaneousGesture(
                     MagnificationGesture()
                         .onChanged { m in
                             mag = true; let k = m / lastMag; lastMag = m
-                            if k != 1 { onZoom(k, CGPoint(x: g.size.width / 2, y: g.size.height / 2)) }
+                            if k != 1 { DBG.z += 1; onZoom(k, CGPoint(x: g.size.width / 2, y: g.size.height / 2)) }
                         }
                         .onEnded { _ in lastMag = 1; DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { mag = false } }
                 )
