@@ -64,9 +64,11 @@ final class TouchView: UIView {
     private var prev = CGPoint.zero; private var prevDist: CGFloat = 0; private var active = false
     override init(frame: CGRect) { super.init(frame: frame); isMultipleTouchEnabled = true; backgroundColor = .clear }
     required init?(coder: NSCoder) { fatalError() }
+    private var scroller: UIScrollView? { var v: UIView? = superview; while let x = v { if let s = x as? UIScrollView { return s }; v = x.superview }; return nil }
+    override func didMoveToWindow() { super.didMoveToWindow(); scroller?.delaysContentTouches = false }
     private func live(_ e: UIEvent?) -> [UITouch] { (e?.allTouches ?? []).filter { $0.phase != .ended && $0.phase != .cancelled } }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if !active, let t = touches.first { active = true; let p = t.location(in: self); prev = p; prevDist = 0; onDown(p) }
+        if !active, let t = touches.first { active = true; scroller?.canCancelContentTouches = false; let p = t.location(in: self); prev = p; prevDist = 0; onDown(p) }
     }
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard active else { return }; let pr = live(event).sorted { $0.timestamp < $1.timestamp }; if pr.isEmpty { return }
@@ -77,7 +79,7 @@ final class TouchView: UIView {
             let p = pr[0].location(in: self); if prevDist == 0 { onMove(p, CGPoint(x: p.x - prev.x, y: p.y - prev.y)) }; prev = p; if prevDist > 0 { prevDist = 0 }
         }
     }
-    private func end(_ e: UIEvent?) { if active && live(e).isEmpty { active = false; prevDist = 0; onUp() } }
+    private func end(_ e: UIEvent?) { if active && live(e).isEmpty { active = false; prevDist = 0; scroller?.canCancelContentTouches = true; onUp() } }
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
 }
