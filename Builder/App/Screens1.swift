@@ -198,12 +198,15 @@ struct Gloss: View {
     }
 }
 
+func ratesGroups() -> [(String, [(String, Arr)])] {
+    var grp: [(String, [(String, Arr)])] = []
+    for (k, v) in D.RDEF.entries { let a = v as! Arr; let g = a.s(0); if let i = grp.firstIndex(where: { $0.0 == g }) { grp[i].1.append((k, a)) } else { grp.append((g, [(k, a)])) } }
+    return grp
+}
 struct Rates: View {
     @ObservedObject var u = UIS.shared
     var body: some View {
-        let P = St.project.o("rates")
-        var grp: [(String, [(String, Arr)])] = []
-        for (k, v) in D.RDEF.entries { let a = v as! Arr; let g = a.s(0); if let i = grp.firstIndex(where: { $0.0 == g }) { grp[i].1.append((k, a)) } else { grp.append((g, [(k, a)])) } }
+        let P = St.project.o("rates"); let grp = ratesGroups()
         let focus = ["found": "mFound", "walls": "mWalls", "roof": "mRoof", "finish": "mFinish", "fence": "mFence", "eng": "mEng"][UI.extra ?? ""]
         let order = grp.enumerated().sorted { ($0.element.0 == focus ? 0 : 1, $0.offset) < ($1.element.0 == focus ? 0 : 1, $1.offset) }.map { $0.element }
         Page {
@@ -256,11 +259,12 @@ struct Sizes: View {
     }
 }
 
+func labMap(_ Ls: [Line]) -> [String: (String, String)] { var lab: [String: (String, String)] = [:]; for l in Ls where lab[l.pk] == nil { lab[l.pk] = (l.label, l.unit) }; return lab }
 struct PriceList: View {
     @ObservedObject var u = UIS.shared
     var body: some View {
         let GG: [(String, String)] = [("g1", "tgFound"), ("g2", "tgWalls"), ("g3", "tgRoof"), ("g4", "tgFin"), ("g5", "tgOps"), ("g6", "tgElec"), ("g7", "tgWater"), ("g8", "tgHeat"), ("g9", "tgSite")]
-        let Ls = estimateLines(); var lab: [String: (String, String)] = [:]; for l in Ls where lab[l.pk] == nil { lab[l.pk] = (l.label, l.unit) }
+        let Ls = estimateLines(); let lab = labMap(Ls)
         func nm(_ k: String) -> String { lab[k]?.0 ?? D.o("TAS_L").aa(k).map { tr3($0) } ?? (D.TR.has(k) ? t(k) : k) }
         func nf(_ v: Double) -> String { let m = money(v); if let i = m.lastIndex(of: " ") { return String(m[m.startIndex..<i]) }; return m }
         let tas = D.a("TAS").compactMap { $0 as? Arr }
