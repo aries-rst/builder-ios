@@ -95,18 +95,25 @@ func deep(_ v: Any?) -> Any? {
     for (k, v) in d.entries where !cur.has(k) { cur[k] = v }; return cur
 }
 
-/// Формат числа как в прототипе: fmt(v,d) — без лишних нулей, округление «половина вверх».
+/// Точное десятичное округление «половина вверх» (как BigDecimal(v).setScale(d, HALF_UP)): "123.40" с d знаками.
+func hup(_ v: Double, _ d: Int) -> String {
+    let neg = v < 0; let full = String(format: "%.40f", abs(v))
+    let parts = full.split(separator: ".", omittingEmptySubsequences: false); let ip = String(parts[0]); let fp = Array(parts.count > 1 ? parts[1] : "")
+    var digits = Array(ip) + Array(fp.prefix(d)); let up = fp.count > d && fp[d] >= "5"
+    if up { var i = digits.count - 1; while i >= 0 { if digits[i] == "9" { digits[i] = "0"; i -= 1 } else { digits[i] = Character(UnicodeScalar(digits[i].asciiValue! + 1)); break } }; if i < 0 { digits.insert("1", at: 0) } }
+    let ilen = digits.count - d; var out = String(digits[0..<ilen]); if d > 0 { out += "." + String(digits[ilen...]) }
+    if neg && out.contains(where: { $0 != "0" && $0 != "." }) { out = "-" + out }
+    return out
+}
+/// Формат числа как в Android: BigDecimal HALF_UP, без лишних нулей.
 func fmt(_ v: Double, _ d: Int = 2) -> String {
     if v.isNaN || v.isInfinite { return "0" }
-    let m = pow(10.0, Double(d)); let x = v * m
-    let r = x.rounded(.toNearestOrAwayFromZero) / m
-    var s = String(format: "%.\(d)f", r)
+    var s = hup(v, d)
     if s.contains(".") { while s.hasSuffix("0") { s.removeLast() }; if s.hasSuffix(".") { s.removeLast() } }
-    if s == "-0" { s = "0" }
     return s
 }
 func hypot2(_ x: Double, _ y: Double) -> Double { (x * x + y * y).squareRoot() }
-func rnd(_ v: Double, _ d: Int) -> Double { guard v.isFinite else { return v }; let m = pow(10.0, Double(d)); return (v * m).rounded(.toNearestOrAwayFromZero) / m }
+func rnd(_ v: Double, _ d: Int) -> Double { guard v.isFinite else { return v }; return Double(hup(v, d)) ?? v }
 func r2(_ v: Double) -> Double { rnd(v, 2) }
 func r3(_ v: Double) -> Double { rnd(v, 3) }
 
