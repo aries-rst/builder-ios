@@ -10,7 +10,11 @@ func fenceColor() -> String {
 }
 
 /// Счётчик перерисовки холстов во время жестов (без полного обновления экрана)
-final class Frame: ObservableObject { static let shared = Frame(); @Published var n = 0; static func bump() { shared.n += 1 } }
+final class Frame: ObservableObject {
+    static let shared = Frame(); @Published var n = 0; private static var pend = false
+    /// Перерисовка не чаще ~30 раз в секунду: события жестов копятся и сливаются в один кадр
+    static func bump() { if pend { return }; pend = true; DispatchQueue.main.asyncAfter(deadline: .now() + 0.033) { pend = false; shared.n += 1 } }
+}
 
 /// Контекст рисования (аналог DrawScope: координаты в точках, density = 1)
 final class DC {
