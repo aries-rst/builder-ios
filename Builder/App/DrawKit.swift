@@ -73,6 +73,15 @@ final class TouchView: UIView {
         }
         if let w = window { return dig(w) }; return nil
     }
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let r = super.hitTest(point, with: event)
+        if r === self, event?.type == .touches {
+            if sc == nil { sc = findScroller() }
+            sc?.delaysContentTouches = false; sc?.panGestureRecognizer.isEnabled = false
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in if let self = self, !self.active { self.sc?.panGestureRecognizer.isEnabled = true } }
+        }
+        return r
+    }
     private func live(_ e: UIEvent?) -> [UITouch] { (e?.allTouches ?? []).filter { $0.phase != .ended && $0.phase != .cancelled } }
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if !active, let t = touches.first { active = true; sc = findScroller(); sc?.isScrollEnabled = false; sc?.panGestureRecognizer.isEnabled = false; let p = t.location(in: self); prev = p; prevDist = 0; onDown(p) }
