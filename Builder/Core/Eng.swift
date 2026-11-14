@@ -130,7 +130,11 @@ func calcExtra(_ b: Obj) -> Obj {
     if s.b("on") && flights != 0 { let H = b.n("floorH"); let n = (H / 0.175).rounded(.up); let run = n * 0.28; let len = hypot2(H, run); let sw = s.n("w"); r["sFl"] = flights; r["sSteps"] = n
         switch s.s("type") {
         case "wood": r["sStringer"] = 2 * len * 1.1 * flights * 0.05 * 0.3; r["sTread"] = n * flights * sw * 0.3 * 0.04 * 1.1; r["sBal"] = (run / 0.15).rounded(.up) * flights
-        case "conc": r["sV"] = (sw * len * 0.15 + n * sw * 0.28 * 0.175 / 2) * flights * 1.05; r["sRebar"] = r.n("sV") * 90; r["sForm"] = (sw * len + 2 * len * 0.3) * flights
+        case "conc":
+            let sv1: Double = sw * len * 0.15; let sv2: Double = n * sw * 0.28 * 0.175 / 2
+            r["sV"] = (sv1 + sv2) * flights * 1.05; r["sRebar"] = r.n("sV") * 90
+            let sf1: Double = sw * len; let sf2: Double = 2 * len * 0.3
+            r["sForm"] = (sf1 + sf2) * flights
         default: r["sChannel"] = 2 * len * 1.1 * flights; r["sMetalSteps"] = n * flights; r["sBal"] = (run / 0.15).rounded(.up) * flights
         }
         r["sRail"] = (len + 1) * flights }

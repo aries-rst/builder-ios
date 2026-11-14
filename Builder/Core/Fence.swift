@@ -50,7 +50,11 @@ func calcFence() -> Obj {
     if eq(f["found"], "conc") && posts != 0 { r["holeV"] = (posts + r.n("gatePosts")) * Double.pi * 0.125 * 0.125 * dep * 1.1 }
     if eq(f["found"], "strip") || heavy { r["stripV"] = L * f.n("fb") * f.n("fh") * 1.05; r["stripRebar"] = L * 4 * 1.1 * 0.888; r["stripForm"] = 2 * L * (f.n("fh") + 0.1); r["dig"] = L * (f.n("fb") + 0.2) * f.n("fh") }
     let its = f.a("items").objs; let gates = its.filter { eq($0["k"], "gate") && !eq($0["mode"], "custom") }; let wk = its.filter { eq($0["k"], "wicket") && !eq($0["mode"], "custom") }
-    r["frame"] = gates.reduce(0) { acc, g in let w = g.n("w"); return acc + (eq(g["kind"], "slide") ? 2 * (w * 1.5 + H) + w * 1.5 : 2 * (2 * (w / 2 + H)) + w) } + wk.reduce(0) { $0 + 2 * ($1.n("w") + H) + $1.n("w") }
+    var frameSum: Double = 0
+    for g in gates { let w: Double = g.n("w")
+        if eq(g["kind"], "slide") { let a: Double = 2 * (w * 1.5 + H); frameSum += a + w * 1.5 } else { let a: Double = 2 * (w / 2 + H); frameSum += 2 * a + w } }
+    for x in wk { let w: Double = x.n("w"); let a: Double = 2 * (w + H); frameSum += a + w }
+    r["frame"] = frameSum
     r["infill"] = gates.reduce(0) { $0 + $1.n("w") * H } + wk.reduce(0) { $0 + $1.n("w") * H }; r["hinges"] = Double(gates.filter { !eq($0["kind"], "slide") }.count) * 4 + Double(wk.count) * 2; r["locks"] = Double(gates.count + wk.count)
     let sl = gates.filter { eq($0["kind"], "slide") }; r["kits"] = Double(sl.count); r["channel"] = sl.reduce(0) { $0 + $1.n("w") * 0.5 }; if !sl.isEmpty { r["slideV"] = Double(sl.count) * 0.6 }
     St.project["calcFence"] = r; return r
