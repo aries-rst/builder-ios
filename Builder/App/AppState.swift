@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Счётчик обновлений интерфейса (аналог UI.tick на Android: модель — изменяемые словари, SwiftUI их не отслеживает).
-final class UIS: ObservableObject { static let shared = UIS(); @Published var tick = 0 }
+final class UIS: ObservableObject { static let shared = UIS(); @Published var tick = 0; @Published var lock = false }
 
 /// Состояние интерфейса: экран и пр.
 enum UI {

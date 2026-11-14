@@ -99,11 +99,32 @@ final class TouchView: UIView {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { end(event) }
 }
-struct Gestures: UIViewRepresentable {
+struct Gestures: View {
     var onDown: (CGPoint) -> Void; var onMove: (CGPoint, CGPoint) -> Void; var onZoom: (CGFloat, CGPoint) -> Void = { _, _ in }; var onUp: () -> Void
-    func makeUIView(context: Context) -> TouchView { let v = TouchView(); apply(v); return v }
-    func updateUIView(_ v: TouchView, context: Context) { apply(v) }
-    private func apply(_ v: TouchView) { v.onDown = onDown; v.onMove = onMove; v.onZoom = onZoom; v.onUp = onUp }
+    @State private var started = false; @State private var last = CGPoint.zero; @State private var lastMag: CGFloat = 1; @State private var mag = false; @State private var size = CGSize.zero
+    var body: some View {
+        GeometryReader { g in
+            Color.clear.contentShape(Rectangle()).onAppear { size = g.size }
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                        .onChanged { v in
+                            if !started { started = true; UIS.shared.lock = true; last = v.startLocation; onDown(v.startLocation) }
+                            if mag { last = v.location; return }
+                            let d = CGPoint(x: v.location.x - last.x, y: v.location.y - last.y); last = v.location
+                            if d.x != 0 || d.y != 0 { onMove(v.location, d) }
+                        }
+                        .onEnded { _ in started = false; mag = false; lastMag = 1; UIS.shared.lock = false; onUp() }
+                )
+                .simultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { m in
+                            mag = true; let k = m / lastMag; lastMag = m
+                            if k != 1 { onZoom(k, CGPoint(x: g.size.width / 2, y: g.size.height / 2)) }
+                        }
+                        .onEnded { _ in lastMag = 1; DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { mag = false } }
+                )
+        }
+    }
 }
 
 // ---------- карта участка ----------

@@ -253,7 +253,7 @@ struct Page<Content: View>: View {
     @ObservedObject var u = UIS.shared
     let content: Content
     init(@ViewBuilder _ content: () -> Content) { self.content = content() }
-    var body: some View { ScrollView { VStack(alignment: .leading, spacing: 0) { content; Gap() }.frame(maxWidth: .infinity, alignment: .leading) }.scrollDismissesKeyboard(.interactively) }
+    var body: some View { ScrollView { VStack(alignment: .leading, spacing: 0) { content; Gap() }.frame(maxWidth: .infinity, alignment: .leading) }.scrollDisabled(u.lock).scrollDismissesKeyboard(.interactively) }
 }
 struct Centered<Content: View>: View {
     let content: Content
