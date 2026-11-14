@@ -60,6 +60,7 @@ struct Settings: View {
                 OBtn("📏 " + T("szTitle"), full: true) { go("sizes") }; OBtn("🧮 " + T("rtTitle"), full: true) { go("rates") }
                 OBtn(T("resetProject"), C.warn, full: true) { St.project = attach(defProject()); upd(); toast(t("resetDone")) }
             }
+            if AdManager.privacyRequired() { Btn("🔒 " + T("privacySettings"), false) { AdManager.showPrivacy() } }
             Sec("⭐ " + T("pmTitle")) {
                 if Premium.on() { Txt(T("pmActive"), 15, C.ok, bold: true) }
                 else {
