@@ -166,7 +166,7 @@ func shade(_ f: Face) -> Color {
     return Color(red: r * k, green: g * k, blue: b * k, opacity: f.a)
 }
 func samePick(_ a: Obj?, _ b: Obj?) -> Bool {
-    guard let a = a, let b = b, eq(a["k"], b["k"]), num(a["b"]) == num(b["b"]) else { return false }
+    guard let a = a, let b = b, a.s("k") == b.s("k"), num(a["b"]) == num(b["b"]) else { return false }
     func L(_ x: Any?, _ y: Any?) -> Bool { lvKey(x) == lvKey(y) }
     switch a.s("k") {
     case "wall": return num(a["i"]) == num(b["i"])
@@ -255,7 +255,7 @@ private func atticWins3D(_ b: Obj, _ W: @escaping WF, _ h: Double, _ loc: [Pt], 
         func zAt(_ dd: Double) -> Double {
             let u = -s / 2 + dd
             for i in 0..<(Pr.count - 1) { let u0 = Pr[i][0], z0 = Pr[i][1], u1 = Pr[i + 1][0], z1 = Pr[i + 1][1]; if u >= u0 - 1e-9 && u <= u1 + 1e-9 { return z0 + (z1 - z0) * (u - u0) / (u1 - u0 == 0 ? 1 : u1 - u0) } }
-            return Pr.last()![1]
+            return Pr.last![1]
         }
         let d0 = 0.6; let d1 = min(d0 + o.n("h") * 0.85, s / 2 - 0.2); let hw = o.n("w") / 2
         func Q(_ e: Double, _ dd: Double) -> V3 { W(px + dx * e - nx * dd, py + dy * e - ny * dd, h + zAt(dd) + 0.06) }
