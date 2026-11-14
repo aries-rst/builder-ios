@@ -11,7 +11,7 @@ struct PlotCanvas: View {
             let _ = { touch.W = Double(g.size.width); touch.H = Double(g.size.height) }()
             ZStack(alignment: .topTrailing) {
                 let _ = fr.n
-                Canvas { c, size in drawPlot(DC(c, size), edit: true) }
+                Canvas { c, size in drawPlot(DC(c, size), edit: true) }.id(fr.n)
                 Gestures(onDown: { touch.down($0) }, onMove: { touch.move($0, $1) }, onZoom: { touch.zoom($0, $1) }, onUp: { touch.up() })
                 VStack(spacing: 6) {
                     zoomBtn("+", "tpZin") { PV.z = min(PV.z * 1.5, 30) }
@@ -210,7 +210,7 @@ struct PlanCanvas: View {
             let _ = { touch.W = Double(g.size.width); touch.H = Double(g.size.height) }()
             ZStack {
                 let _ = fr.n
-                Canvas { c, size in drawPlan(DC(c, size), curB(), UI.lv) }
+                Canvas { c, size in drawPlan(DC(c, size), curB(), UI.lv) }.id(fr.n)
                 Gestures(onDown: { touch.down($0) }, onMove: { touch.move($0, $1) }, onUp: { touch.up() })
             }
         }.frame(height: full ? UIScreen.main.bounds.height - 90 : 340).background(C.field).cornerRadius(12).clipped().padding(.horizontal, 16)

@@ -341,7 +341,6 @@ struct Expandable<Content: View>: View {
                 VStack { Spacer(minLength: 0); content(true); Spacer(minLength: 0) }
                 Txt("✕", 22, C.accent, bold: true).frame(width: 44, height: 44).background(C.card.opacity(0.9)).cornerRadius(22).contentShape(Circle())
                     .onTapGesture { full = false }.padding(.leading, 14).padding(.top, 10)
-                Text("d\(DBG.d) m\(DBG.m) z\(DBG.z) u\(DBG.u) f\(fr.n) Z\(String(format: "%.2f", PV.z)) x\(Int(PV.ox)) y\(Int(PV.oy))").font(.system(size: 11)).foregroundColor(.white).padding(4).background(Color.black.opacity(0.6)).padding(.leading, 70).padding(.top, 20)
             }
         }
     }

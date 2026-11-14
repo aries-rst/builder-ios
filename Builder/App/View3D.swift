@@ -486,7 +486,7 @@ struct V3Canvas: View {
     var body: some View {
         ZStack {
             let _ = fr.n
-            Canvas { c, size in draw3D(DC(c, size)) }
+            Canvas { c, size in draw3D(DC(c, size)) }.id(fr.n)
             Gestures(onDown: { o in tap.x = Double(o.x); tap.y = Double(o.y); tap.dist = 0; tap.multi = false; tap.cx = nil },
                      onMove: { _, dl in
                         tap.cx = nil; tap.dist += Double(abs(dl.x) + abs(dl.y))
