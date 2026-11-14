@@ -479,6 +479,7 @@ func addDoorOnPw(_ b: Obj, _ lv: Any?, _ wid: Double) {
 // ---------- экран ----------
 final class Tap { var x = 0.0, y = 0.0, dist = 0.0; var multi = false; var cx: Double? = nil; var cy = 0.0 }
 struct V3Canvas: View {
+    var full = false
     @ObservedObject var fr = Frame.shared
     @ObservedObject var u = UIS.shared
     @State private var tap = Tap()
@@ -495,7 +496,7 @@ struct V3Canvas: View {
                         if let cx0 = tap.cx { V3D.px += Double(c.x) - cx0; V3D.py += Double(c.y) - tap.cy }
                         tap.cx = Double(c.x); tap.cy = Double(c.y); Frame.bump() },
                      onUp: { if !tap.multi && tap.dist <= 8 { pick3d(tap.x, tap.y) } })
-        }.frame(height: 440).clipped()
+        }.frame(height: full ? UIScreen.main.bounds.height - 90 : 440).clipped()
     }
 }
 struct View3DScreen: View {
@@ -513,7 +514,7 @@ struct View3DScreen: View {
                 if V3D.mode == "in" { inSel(p, inB) }
             }
             HintOut(T("view3dHint"))
-            V3Canvas()
+            Expandable { V3Canvas(full: $0) }
             navPad
             S3Panel()
             Sec { info(bs) }

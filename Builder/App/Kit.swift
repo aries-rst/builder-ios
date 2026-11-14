@@ -322,3 +322,25 @@ struct ExtrasUI: View {
         }
     }
 }
+
+/// Холст с кнопкой «на весь экран» (в полноэкранном режиме нет прокрутки страницы — жесты работают как в Android)
+struct Expandable<Content: View>: View {
+    let content: (Bool) -> Content
+    @State private var full = false
+    init(@ViewBuilder _ content: @escaping (Bool) -> Content) { self.content = content }
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            content(false)
+            Txt("⛶", 20, C.accent, bold: true).frame(width: 40, height: 40).background(C.bg.opacity(0.8)).cornerRadius(20).contentShape(Circle())
+                .onTapGesture { full = true }.padding(.trailing, 18).padding(.bottom, 10)
+        }
+        .fullScreenCover(isPresented: $full) {
+            ZStack(alignment: .topLeading) {
+                C.bg.ignoresSafeArea()
+                VStack { Spacer(minLength: 0); content(true); Spacer(minLength: 0) }
+                Txt("✕", 22, C.accent, bold: true).frame(width: 44, height: 44).background(C.card.opacity(0.9)).cornerRadius(22).contentShape(Circle())
+                    .onTapGesture { full = false }.padding(.leading, 14).padding(.top, 10)
+            }
+        }
+    }
+}

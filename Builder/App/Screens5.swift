@@ -2,6 +2,7 @@ import SwiftUI
 
 // ---------- участок ----------
 struct PlotCanvas: View {
+    var full = false
     @ObservedObject var fr = Frame.shared
     @ObservedObject var u = UIS.shared
     @State private var touch = PlotTouch()
@@ -19,7 +20,7 @@ struct PlotCanvas: View {
                     zoomBtn(PV.del ? "✓" : "🗑", "tpDelMode") { PV.del = !PV.del; PV.delSet.removeAll(); PV.draw = nil; UI.tick += 1 }
                 }.padding(8)
             }
-        }.frame(height: 400).background(C.field).cornerRadius(12).clipped().padding(.horizontal, 8)
+        }.frame(height: full ? UIScreen.main.bounds.height - 90 : 400).background(C.field).cornerRadius(12).clipped().padding(.horizontal, 8)
     }
     func zoomBtn(_ l: String, _ tip: String, _ f: @escaping () -> Void) -> some View {
         Txt(l, 20, C.accent, bold: true).frame(width: 40, height: 40).background(C.bg.opacity(0.8)).cornerRadius(20).contentShape(Circle())
@@ -48,7 +49,7 @@ struct PlotScreen: View {
         let p = St.project; let its = items(); let sel = selItem(); let poly = plot()
         Page {
             TopBar(T("plotTitle"), { go("home") })
-            PlotCanvas()
+            Expandable { PlotCanvas(full: $0) }
             if PV.del { delSec(p) }
             if let P = PV.draw { drawSec(P) }
             HintOut(T("sTapHint") + " " + T("sZoomHint"))
@@ -200,6 +201,7 @@ struct PlotScreen: View {
 
 // ---------- планировка ----------
 struct PlanCanvas: View {
+    var full = false
     @ObservedObject var fr = Frame.shared
     @ObservedObject var u = UIS.shared
     @State private var touch = PlanTouch()
@@ -211,7 +213,7 @@ struct PlanCanvas: View {
                 Canvas { c, size in drawPlan(DC(c, size), curB(), UI.lv) }
                 Gestures(onDown: { touch.down($0) }, onMove: { touch.move($0, $1) }, onUp: { touch.up() })
             }
-        }.frame(height: 340).background(C.field).cornerRadius(12).clipped().padding(.horizontal, 16)
+        }.frame(height: full ? UIScreen.main.bounds.height - 90 : 340).background(C.field).cornerRadius(12).clipped().padding(.horizontal, 16)
     }
 }
 struct RoomsScreen: View {
@@ -232,7 +234,7 @@ struct RoomsScreen: View {
                 if eq(b["kind"], "house") { basAttic(b) }
             }
             toolsBar(b, lv)
-            PlanCanvas()
+            Expandable { PlanCanvas(full: $0) }
             HintOut(T(isManual(b, lv) ? "rmHintM" : "rmHint") + " · \(fmt(inn.iw)) × \(fmt(inn.id)) \(T("m"))")
             if let o = planOf(b, lv)?.a("ops").objs.first(where: { $0.n("id") == PL.op }) { opSec(b, lv, o) }
             if let s = b.a("stairs").objs.first(where: { $0.n("id") == PL.st && (lvEq($0["lv"], lv) || lvEq(nextLv(b, $0["lv"]), lv)) }) { stairSec(b, s) }
