@@ -262,11 +262,11 @@ struct Sizes: View {
 func labMap(_ Ls: [Line]) -> [String: (String, String)] { var lab: [String: (String, String)] = [:]; for l in Ls where lab[l.pk] == nil { lab[l.pk] = (l.label, l.unit) }; return lab }
 struct PriceList: View {
     @ObservedObject var u = UIS.shared
+    func nm(_ k: String, _ lab: [String: (String, String)]) -> String { lab[k]?.0 ?? D.o("TAS_L").aa(k).map { tr3($0) } ?? (D.TR.has(k) ? t(k) : k) }
+    func nf(_ v: Double) -> String { let m = money(v); if let i = m.lastIndex(of: " ") { return String(m[m.startIndex..<i]) }; return m }
     var body: some View {
         let GG: [(String, String)] = [("g1", "tgFound"), ("g2", "tgWalls"), ("g3", "tgRoof"), ("g4", "tgFin"), ("g5", "tgOps"), ("g6", "tgElec"), ("g7", "tgWater"), ("g8", "tgHeat"), ("g9", "tgSite")]
         let Ls = estimateLines(); let lab = labMap(Ls)
-        func nm(_ k: String) -> String { lab[k]?.0 ?? D.o("TAS_L").aa(k).map { tr3($0) } ?? (D.TR.has(k) ? t(k) : k) }
-        func nf(_ v: Double) -> String { let m = money(v); if let i = m.lastIndex(of: " ") { return String(m[m.startIndex..<i]) }; return m }
         let tas = D.a("TAS").compactMap { $0 as? Arr }
         let dyn = Array(NSOrderedSet(array: Ls.map { $0.pk })).compactMap { $0 as? String }.filter { k in !tas.contains { $0.s(0) == k } && tasPrice(k) > 0 }
         Page {
@@ -283,7 +283,7 @@ struct PriceList: View {
             if !dyn.isEmpty { Sec(T("tasProj")) { ForEach(dyn, id: \.self) { k in Stat("\(lab[k]!.0) (\(lab[k]!.1))", "≈ " + nf(cnv(tasPrice(k)))) }; Hint(T("tasDyn")) } }
             ForEach(GG, id: \.0) { (g, lk) in
                 Sec(T(lk)) { ForEach(Array(tas.filter { $0.s(3) == g }.enumerated()), id: \.offset) { _, x in
-                    let k = x.s(0); Stat(nm(k) + (lab[k].map { " (\($0.1))" } ?? ""), (num(x.at(2)) != 0 ? "✓ " : "≈ ") + nf(cnv(num(x.at(1))))) } }
+                    let k = x.s(0); Stat(nm(k, lab) + (lab[k].map { " (\($0.1))" } ?? ""), (num(x.at(2)) != 0 ? "✓ " : "≈ ") + nf(cnv(num(x.at(1))))) } }
             }
             Sec(T("tasRules")) { Hint(T("tasRulesT")) }
             HintOut("⚠️ " + T("tasNote"))
